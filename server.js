@@ -47,8 +47,8 @@ function maybe_bounce(req, res, sock, head) {
         return false;
     }
 
-    const subdomain = tldjs.getSubdomain(hostname);
-    if (!subdomain) {
+    const subdomain =  hostname.split(".")[0];
+    if (subdomain === 'vapp') {
         return false;
     }
 
@@ -273,8 +273,8 @@ module.exports = function(opt) {
         const req_id = req.params.req_id;
 
         // limit requested hostnames to 63 characters
-        if (! /^[a-z0-9]{4,63}$/.test(req_id)) {
-            const err = new Error('Invalid subdomain. Subdomains must be lowercase and between 4 and 63 alphanumeric characters.');
+        if (! /^(?:[a-z0-9][a-z0-9\-\.]{4,63}[a-z0-9]|[a-z0-9]{4,63})$/.test(req_id)) {
+            const err = new Error('Invalid subdomain. Subdomains must be lowercase and between 4 and 63 alphanumeric characters and dash.');
             err.statusCode = 403;
             return next(err);
         }
@@ -285,7 +285,7 @@ module.exports = function(opt) {
                 return next(err);
             }
 
-            const url = schema + '://' + req_id + '.' + req.headers.host;
+            const url = schema + '://' + info.id + '.' + req.headers.host;
             info.url = url;
             res.json(info);
         });
